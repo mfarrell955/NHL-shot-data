@@ -6,13 +6,15 @@ st.title("NHL Player Shots & Points Tracker")
 
 # --- Helper Functions ---
 def get_player_id(name):
-    url = "https://api-web.nhle.com/v1/player"
+    url = f"https://search.d3.nhle.com/api/v1/search/player?query={name}"
     data = requests.get(url).json()
-    for p in data:
-        full = p.get("firstName", {}).get("default", "") + " " + p.get("lastName", {}).get("default", "")
-        if name.lower() in full.lower():
-            return p.get("playerId")
-    return None
+    items = data.get("items", [])
+    if not items:
+        return None
+    nhl_players = [p for p in items if p.get("leagueAbbrev") == "NHL"]
+    if nhl_players:
+        return nhl_players[0].get("playerId")
+    return items[0].get("playerId")
 
 def get_game_log(player_id, season):
     url = f"https://api-web.nhle.com/v1/player/{player_id}/game-log/{season}?site=en_nhl"
@@ -20,6 +22,13 @@ def get_game_log(player_id, season):
     return pd.DataFrame(data.get("gameLog", []))
 
 def career_shots_avg(player_id):
+    url = f"https://api-web.nhle.com/v1/player/{player_id}/landing"
+    data = requests.get(url).json()
+    seasons = data.get("seasonTotals", [])
+    df = pd.DataFrame(seasons)
+    total_shots = df["shots"].sum()
+    total_games = df["gamesPlayed"].sum()
+    return round(total_shots / total_games, 2) if total_games > 0 else 0(player_id):
     url = f"https://api-web.nhle.com/v1/player/{player_id}/landing"
     data = requests.get(url).json()
     seasons = data.get("seasonTotals", [])
