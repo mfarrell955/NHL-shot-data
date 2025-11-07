@@ -28,7 +28,7 @@ def career_shots_avg(player_id):
     df = pd.DataFrame(seasons)
     total_shots = df["shots"].sum()
     total_games = df["gamesPlayed"].sum()
-    return round(total_shots / total_games, 2) if total_games > 0 else 0(player_id):
+    return round(total_shots / total_games, 2) if total_games > 0 else 0:
     url = f"https://api-web.nhle.com/v1/player/{player_id}/landing"
     data = requests.get(url).json()
     seasons = data.get("seasonTotals", [])
